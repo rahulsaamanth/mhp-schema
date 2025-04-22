@@ -13,6 +13,10 @@ import {
   address,
   paymentMethod,
   cart,
+  store,
+  adminStoreAccess,
+  adminStoreSession,
+  inventoryManagement,
 } from "./schema"
 
 export const accountRelations = relations(account, ({ one }) => ({
@@ -29,6 +33,9 @@ export const userRelations = relations(user, ({ many }) => ({
   reviews: many(review),
   addresses: many(address),
   cartItems: many(cart),
+  adminStoreAccess: many(adminStoreAccess),
+  adminStoreSessions: many(adminStoreSession),
+  inventoryManagement: many(inventoryManagement),
 }))
 
 export const twoFactorConfirmationRelations = relations(
@@ -102,6 +109,11 @@ export const orderRelations = relations(order, ({ one, many }) => ({
     fields: [order.paymentMethodId],
     references: [paymentMethod.id],
   }),
+  store: one(store, {
+    fields: [order.storeId],
+    references: [store.id],
+  }),
+  inventoryManagement: many(inventoryManagement),
 }))
 
 export const orderDetailsRelations = relations(orderDetails, ({ one }) => ({
@@ -153,3 +165,64 @@ export const cartItemRelations = relations(cart, ({ one }) => ({
     references: [productVariant.id],
   }),
 }))
+
+// Store Relations
+export const storeRelations = relations(store, ({ many }) => ({
+  adminAccess: many(adminStoreAccess),
+  adminSessions: many(adminStoreSession),
+  orders: many(order),
+  inventoryManagement: many(inventoryManagement),
+}))
+
+// Admin Store Access Relations
+export const adminStoreAccessRelations = relations(
+  adminStoreAccess,
+  ({ one }) => ({
+    user: one(user, {
+      fields: [adminStoreAccess.userId],
+      references: [user.id],
+    }),
+    store: one(store, {
+      fields: [adminStoreAccess.storeId],
+      references: [store.id],
+    }),
+  })
+)
+
+// Admin Store Session Relations
+export const adminStoreSessionRelations = relations(
+  adminStoreSession,
+  ({ one }) => ({
+    user: one(user, {
+      fields: [adminStoreSession.userId],
+      references: [user.id],
+    }),
+    store: one(store, {
+      fields: [adminStoreSession.storeId],
+      references: [store.id],
+    }),
+  })
+)
+
+// Inventory Management Relations
+export const inventoryManagementRelations = relations(
+  inventoryManagement,
+  ({ one }) => ({
+    productVariant: one(productVariant, {
+      fields: [inventoryManagement.productVariantId],
+      references: [productVariant.id],
+    }),
+    order: one(order, {
+      fields: [inventoryManagement.orderId],
+      references: [order.id],
+    }),
+    store: one(store, {
+      fields: [inventoryManagement.storeId],
+      references: [store.id],
+    }),
+    createdByUser: one(user, {
+      fields: [inventoryManagement.createdBy],
+      references: [user.id],
+    }),
+  })
+)
