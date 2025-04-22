@@ -1,0 +1,65 @@
+{
+  "name": "@rahulsaamanth/mhp-schema",
+  "version": "1.1.2",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [],
+  "author": "rahulsaamanth",
+  "license": "ISC",
+  "description": "",
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.0",
+    "dotenv": "^16.4.7",
+    "drizzle-orm": "^0.41.0",
+    "next-auth": "^5.0.0-beta.25",
+    "postgres": "^3.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.14",
+    "drizzle-kit": "^0.30.6",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js",
+      "require": "./dist/index.js"
+    },
+    "./schema": {
+      "types": "./dist/schema.d.ts",
+      "default": "./dist/schema.js",
+      "require": "./dist/schema.js"
+    },
+    "./relations": {
+      "types": "./dist/relations.d.ts",
+      "default": "./dist/relations.js",
+      "require": "./dist/relations.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "dist/*"
+      ],
+      "schema": [
+        "dist/schema.d.ts"
+      ],
+      "relations": [
+        "dist/relations.d.ts"
+      ]
+    }
+  }
+}
