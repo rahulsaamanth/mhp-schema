@@ -17,6 +17,7 @@ import {
   adminStoreAccess,
   adminStoreSession,
   inventoryManagement,
+  productInventory,
 } from "./schema"
 
 export const accountRelations = relations(account, ({ one }) => ({
@@ -84,6 +85,7 @@ export const productVariantRelations = relations(
     }),
     orderDetails: many(orderDetails),
     cartItems: many(cart),
+    inventory: many(productInventory),
   })
 )
 
@@ -172,6 +174,7 @@ export const storeRelations = relations(store, ({ many }) => ({
   adminSessions: many(adminStoreSession),
   orders: many(order),
   inventoryManagement: many(inventoryManagement),
+  productInventory: many(productInventory),
 }))
 
 // Admin Store Access Relations
@@ -223,6 +226,21 @@ export const inventoryManagementRelations = relations(
     createdByUser: one(user, {
       fields: [inventoryManagement.createdBy],
       references: [user.id],
+    }),
+  })
+)
+
+// Product Inventory Relations
+export const productInventoryRelations = relations(
+  productInventory,
+  ({ one }) => ({
+    productVariant: one(productVariant, {
+      fields: [productInventory.productVariantId],
+      references: [productVariant.id],
+    }),
+    store: one(store, {
+      fields: [productInventory.storeId],
+      references: [store.id],
     }),
   })
 )

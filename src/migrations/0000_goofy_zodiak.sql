@@ -190,6 +190,18 @@ CREATE TABLE "Product" (
 	CONSTRAINT "Product_id_unique" UNIQUE("id")
 );
 --> statement-breakpoint
+CREATE TABLE "ProductInventory" (
+	"id" varchar(32) PRIMARY KEY NOT NULL,
+	"productVariantId" varchar(32) NOT NULL,
+	"storeId" varchar(32) NOT NULL,
+	"stock" integer DEFAULT 0 NOT NULL,
+	"lowStockThreshold" integer DEFAULT 5,
+	"reservedStock" integer DEFAULT 0,
+	"createdAt" timestamp DEFAULT now() NOT NULL,
+	"updatedAt" timestamp DEFAULT now(),
+	CONSTRAINT "ProductInventory_id_unique" UNIQUE("id")
+);
+--> statement-breakpoint
 CREATE TABLE "ProductVariant" (
 	"id" varchar(32) PRIMARY KEY NOT NULL,
 	"discontinued" boolean DEFAULT false,
@@ -305,6 +317,8 @@ ALTER TABLE "OrderDetails" ADD CONSTRAINT "OrderDetails_productVariantId_fkey" F
 ALTER TABLE "PaymentMethod" ADD CONSTRAINT "PaymentMethod_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE "Product" ADD CONSTRAINT "Product_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "public"."Category"("id") ON DELETE restrict ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE "Product" ADD CONSTRAINT "Product_manufacturerId_fkey" FOREIGN KEY ("manufacturerId") REFERENCES "public"."Manufacturer"("id") ON DELETE restrict ON UPDATE cascade;--> statement-breakpoint
+ALTER TABLE "ProductInventory" ADD CONSTRAINT "ProductInventory_variantId_fkey" FOREIGN KEY ("productVariantId") REFERENCES "public"."ProductVariant"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "ProductInventory" ADD CONSTRAINT "ProductInventory_storeId_fkey" FOREIGN KEY ("storeId") REFERENCES "public"."Store"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "ProductVariant" ADD CONSTRAINT "ProductVariant_productId_fkey" FOREIGN KEY ("productId") REFERENCES "public"."Product"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE "Review" ADD CONSTRAINT "Review_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE "Review" ADD CONSTRAINT "Review_productId_fkey" FOREIGN KEY ("productId") REFERENCES "public"."Product"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
@@ -343,6 +357,11 @@ CREATE INDEX "product_category_idx" ON "Product" USING btree ("categoryId");--> 
 CREATE INDEX "product_created_at_idx" ON "Product" USING btree ("createdAt");--> statement-breakpoint
 CREATE INDEX "product_form_unit_idx" ON "Product" USING btree ("unit","form");--> statement-breakpoint
 CREATE INDEX "product_category_status_idx" ON "Product" USING btree ("categoryId","status");--> statement-breakpoint
+CREATE UNIQUE INDEX "idx_product_inventory_unique" ON "ProductInventory" USING btree ("productVariantId","storeId");--> statement-breakpoint
+CREATE INDEX "idx_product_inventory_variant" ON "ProductInventory" USING btree ("productVariantId");--> statement-breakpoint
+CREATE INDEX "idx_product_inventory_store" ON "ProductInventory" USING btree ("storeId");--> statement-breakpoint
+CREATE INDEX "idx_product_inventory_stock" ON "ProductInventory" USING btree ("stock");--> statement-breakpoint
+CREATE INDEX "idx_product_inventory_lowstock" ON "ProductInventory" USING btree ("stock","lowStockThreshold");--> statement-breakpoint
 CREATE INDEX "idx_variant_sku" ON "ProductVariant" USING btree ("sku");--> statement-breakpoint
 CREATE INDEX "idx_variant_stock_location" ON "ProductVariant" USING btree ("stockByLocation");--> statement-breakpoint
 CREATE INDEX "idx_variant_search" ON "ProductVariant" USING btree ("productId","potency","packSize");--> statement-breakpoint

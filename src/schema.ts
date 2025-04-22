@@ -194,10 +194,13 @@ export type Store = typeof store.$inferSelect
 export type AdminStoreAccess = typeof adminStoreAccess.$inferSelect
 export type AdminStoreSession = typeof adminStoreSession.$inferSelect
 
-export type StockByLocation = {
+export type StockByStoreId = {
   storeId: string
   stock: number
 }
+
+// Add productInventory type
+export type ProductInventory = typeof productInventory.$inferSelect
 
 export const store = pgTable(
   "Store",
@@ -516,7 +519,7 @@ export const productVariant = pgTable(
     potency: potency("potency").default("NONE").notNull(),
     packSize: integer("packSize"),
     stockByLocation: jsonb("stockByLocation")
-      .$type<StockByLocation[]>()
+      .$type<StockByStoreId[]>()
       .notNull()
       .default([]),
     costPrice: doublePrecision("costPrice"),
@@ -549,6 +552,45 @@ export const productVariant = pgTable(
     index("idx_variant_price").on(table.sellingPrice, table.mrp),
     index("idx_variant_potency").on(table.potency),
     index("idx_variant_discount").on(table.discount),
+  ]
+)
+
+export const productInventory = pgTable(
+  "ProductInventory",
+  {
+    id: customId("id", ENTITY_PREFIX.INVENTORY + "STOCK"),
+    productVariantId: varchar("productVariantId", { length: 32 }).notNull(),
+    storeId: varchar("storeId", { length: 32 }).notNull(),
+    stock: integer("stock").notNull().default(0),
+    lowStockThreshold: integer("lowStockThreshold").default(5),
+    reservedStock: integer("reservedStock").default(0),
+    createdAt: timestamp("createdAt", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt", { mode: "date" })
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.productVariantId],
+      foreignColumns: [productVariant.id],
+      name: "ProductInventory_variantId_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.storeId],
+      foreignColumns: [store.id],
+      name: "ProductInventory_storeId_fkey",
+    }).onDelete("cascade"),
+    uniqueIndex("idx_product_inventory_unique").on(
+      table.productVariantId,
+      table.storeId
+    ),
+    index("idx_product_inventory_variant").on(table.productVariantId),
+    index("idx_product_inventory_store").on(table.storeId),
+    index("idx_product_inventory_stock").on(table.stock),
+    index("idx_product_inventory_lowstock").on(
+      table.stock,
+      table.lowStockThreshold
+    ),
   ]
 )
 
