@@ -190,6 +190,9 @@ export type Category = typeof category.$inferSelect
 export type Variant = typeof productVariant.$inferSelect
 export type Manufacturer = typeof manufacturer.$inferSelect
 export type Tag = typeof tag.$inferSelect
+export type Store = typeof store.$inferSelect
+export type AdminStoreAccess = typeof adminStoreAccess.$inferSelect
+export type AdminStoreSession = typeof adminStoreSession.$inferSelect
 
 export type StockByLocation = {
   storeId: string
