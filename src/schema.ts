@@ -29,6 +29,8 @@ const ENTITY_PREFIX = {
   ADDRESS: "ADDR",
   PAYMENT: "PYMT",
   INVENTORY: "INV",
+  STORE: "STR",
+  ADMIN_STORE: "ASTR",
 } as const
 
 export const customId = (name: string, prefix: string) =>
@@ -47,7 +49,7 @@ export const customId = (name: string, prefix: string) =>
 
 export const orderType = pgEnum("OrderType", ["OFFLINE", "ONLINE"])
 
-export const userRole = pgEnum("UserRole", ["ADMIN", "USER"])
+export const userRole = pgEnum("UserRole", ["ADMIN", "USER", "STORE_ADMIN"])
 
 export const movementType = pgEnum("MovementType", ["IN", "OUT", "ADJUSTMENT"])
 
@@ -74,12 +76,6 @@ export const productStatus = pgEnum("ProductStatus", [
   "ACTIVE",
   "DRAFT",
   "ARCHIVED",
-])
-
-export const skuLocation = pgEnum("SKULocation", [
-  "MANGALORE-01",
-  "MANGALORE-02",
-  "KERALA-01",
 ])
 
 export const productForm = pgEnum("ProductForm", [
@@ -196,16 +192,101 @@ export type Manufacturer = typeof manufacturer.$inferSelect
 export type Tag = typeof tag.$inferSelect
 
 export type StockByLocation = {
-  location: (typeof skuLocation.enumValues)[number]
+  storeId: string
   stock: number
 }
+
+export const store = pgTable(
+  "Store",
+  {
+    id: customId("id", ENTITY_PREFIX.STORE),
+    name: text("name").notNull(),
+    code: varchar("code", { length: 30 }).notNull().unique(),
+    location: text("location").notNull(),
+    isActive: boolean("isActive").default(true).notNull(),
+    createdAt: timestamp("createdAt", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt", { mode: "date" })
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [
+    index("idx_store_name").on(table.name),
+    index("idx_store_code").on(table.code),
+    index("idx_store_active").on(table.isActive),
+  ]
+)
+
+export const adminStoreAccess = pgTable(
+  "AdminStoreAccess",
+  {
+    id: customId("id", ENTITY_PREFIX.ADMIN_STORE),
+    userId: varchar("userId", { length: 32 }).notNull(),
+    storeId: varchar("storeId", { length: 32 }).notNull(),
+    canManageInventory: boolean("canManageInventory").default(true).notNull(),
+    canManageOrders: boolean("canManageOrders").default(true).notNull(),
+    canViewAnalytics: boolean("canViewAnalytics").default(true).notNull(),
+    canManageProducts: boolean("canManageProducts").default(true).notNull(),
+    createdAt: timestamp("createdAt", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt", { mode: "date" })
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [user.id],
+      name: "AdminStoreAccess_userId_fkey",
+    })
+      .onUpdate("cascade")
+      .onDelete("cascade"),
+    foreignKey({
+      columns: [table.storeId],
+      foreignColumns: [store.id],
+      name: "AdminStoreAccess_storeId_fkey",
+    })
+      .onUpdate("cascade")
+      .onDelete("cascade"),
+    uniqueIndex("idx_admin_store_unique").on(table.userId, table.storeId),
+    index("idx_admin_store_user").on(table.userId),
+    index("idx_admin_store_store").on(table.storeId),
+  ]
+)
+
+export const adminStoreSession = pgTable(
+  "AdminStoreSession",
+  {
+    id: customId("id", "ASS"),
+    userId: varchar("userId", { length: 32 }).notNull(),
+    storeId: varchar("storeId", { length: 32 }).notNull(),
+    lastAccessed: timestamp("lastAccessed", { mode: "date" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [user.id],
+      name: "AdminStoreSession_userId_fkey",
+    })
+      .onUpdate("cascade")
+      .onDelete("cascade"),
+    foreignKey({
+      columns: [table.storeId],
+      foreignColumns: [store.id],
+      name: "AdminStoreSession_storeId_fkey",
+    })
+      .onUpdate("cascade")
+      .onDelete("cascade"),
+    uniqueIndex("idx_admin_store_session_unique").on(table.userId),
+  ]
+)
 
 export const verificationToken = pgTable(
   "VerificationToken",
   {
     identifier: text("identifier").notNull(),
     token: text("token").notNull(),
-    expires: timestamp("expires", { precision: 3, mode: "date" }).notNull(),
+    expires: timestamp("expires", { mode: "date" }).notNull(),
   },
   (table) => [
     uniqueIndex("VerificationToken_token_key").using(
@@ -221,7 +302,7 @@ export const passwordResetToken = pgTable(
     id: customId("id", ENTITY_PREFIX.PASSWORD_RESET),
     email: text("email").notNull(),
     token: text("token").notNull(),
-    expires: timestamp("expires", { precision: 3, mode: "date" }).notNull(),
+    expires: timestamp("expires", { mode: "date" }).notNull(),
   },
   (table) => [
     uniqueIndex("PasswordResetToken_email_token_key").using(
@@ -242,7 +323,7 @@ export const twoFactorToken = pgTable(
     id: customId("id", ENTITY_PREFIX.TWO_FACTOR),
     email: text("email").notNull(),
     token: text("token").notNull(),
-    expires: timestamp("expires", { precision: 3, mode: "date" }).notNull(),
+    expires: timestamp("expires", { mode: "date" }).notNull(),
   },
   (table) => [
     uniqueIndex("TwoFactorToken_email_token_key").using(
@@ -263,19 +344,17 @@ export const user = pgTable(
     id: customId("id", ENTITY_PREFIX.USER),
     name: text("name"),
     email: text("email"),
-    emailVerified: timestamp("emailVerified", { precision: 3, mode: "date" }),
+    emailVerified: timestamp("emailVerified", { mode: "date" }),
     image: text("image"),
     password: text("password"),
     role: userRole("role").default("USER").notNull(),
-    lastActive: timestamp("lastActive", { precision: 3, mode: "date" })
+    lastActive: timestamp("lastActive", { mode: "date" })
       .defaultNow()
       .notNull(),
     isTwoFactorEnabled: boolean("isTwoFactorEnabled").default(false).notNull(),
     phone: text("phone"),
-    createdAt: timestamp("createdAt", { precision: 3, mode: "date" })
-      .defaultNow()
-      .notNull(),
-    updatedAt: timestamp("updatedAt", { precision: 3, mode: "date" })
+    createdAt: timestamp("createdAt", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt", { mode: "date" })
       .defaultNow()
       .$onUpdate(() => new Date()),
   },
@@ -479,10 +558,8 @@ export const paymentMethod = pgTable(
     isDefault: boolean("isDefault").default(false).notNull(),
     paymentDetails: jsonb("paymentDetails").notNull(),
     displayDetails: jsonb("displayDetails").notNull(),
-    createdAt: timestamp("createdAt", { precision: 3, mode: "date" })
-      .defaultNow()
-      .notNull(),
-    updatedAt: timestamp("updatedAt", { precision: 3, mode: "date" })
+    createdAt: timestamp("createdAt", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt", { mode: "date" })
       .defaultNow()
       .$onUpdate(() => new Date()),
   },
@@ -502,9 +579,16 @@ export const order = pgTable(
   "Order",
   {
     id: customId("id", ENTITY_PREFIX.ORDER),
-    userId: varchar("userId", { length: 32 }).notNull(),
+    userId: varchar("userId", { length: 32 }),
+
+    customerName: text("customerName"),
+    customerPhone: text("customerPhone"),
+    customerEmail: text("customerEmail"),
+    isGuestOrder: boolean("isGuestOrder").default(false).notNull(),
+
+    storeId: varchar("storeId", { length: 32 }),
+
     orderDate: timestamp("orderDate", {
-      precision: 3,
       mode: "date",
     })
       .defaultNow()
@@ -562,9 +646,15 @@ export const order = pgTable(
       columns: [table.paymentMethodId],
       foreignColumns: [paymentMethod.id],
       name: "Order_paymentMethod_fkey",
+    }),
+    foreignKey({
+      columns: [table.storeId],
+      foreignColumns: [store.id],
+      name: "Order_storeId_fkey",
     })
       .onUpdate("cascade")
-      .onDelete("restrict"),
+      .onDelete("set null"),
+    index("order_store_idx").on(table.storeId),
     index("order_date_status_idx").on(table.orderDate, table.deliveryStatus),
     index("order_user_date_idx").on(table.userId, table.orderDate),
     index("order_payment_status_idx").on(table.paymentStatus),
@@ -593,7 +683,7 @@ export const orderDetails = pgTable(
     returnedAt: timestamp("returnedAt", { mode: "date" }),
     refundAmount: doublePrecision("refundAmount"),
 
-    fulfilledFromLocation: skuLocation("fulfilledFromLocation"),
+    fulfilledFromStoreId: varchar("fulfilledFromStoreId", { length: 32 }),
   },
   (table) => [
     foreignKey({
@@ -611,7 +701,7 @@ export const orderDetails = pgTable(
       .onUpdate("cascade")
       .onDelete("cascade"),
 
-    index("order_details_fulfillment_idx").on(table.fulfilledFromLocation),
+    index("order_details_fulfillment_idx").on(table.fulfilledFromStoreId),
   ]
 )
 
@@ -623,10 +713,8 @@ export const review = pgTable(
     comment: text("comment"),
     userId: varchar("userId", { length: 32 }).notNull(),
     productId: varchar("productId", { length: 32 }).notNull(),
-    createdAt: timestamp("createdAt", { precision: 3, mode: "date" })
-      .defaultNow()
-      .notNull(),
-    updatedAt: timestamp("updatedAt", { precision: 3, mode: "date" })
+    createdAt: timestamp("createdAt", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt", { mode: "date" })
       .defaultNow()
       .$onUpdate(() => new Date()),
   },
@@ -661,10 +749,8 @@ export const address = pgTable(
     postalCode: varchar("postalCode", { length: 10 }).notNull(),
     country: varchar("country", { length: 50 }).default("India").notNull(),
     type: addressType("addressType").default("SHIPPING").notNull(),
-    createdAt: timestamp("createdAt", { precision: 3, mode: "date" })
-      .defaultNow()
-      .notNull(),
-    updatedAt: timestamp("updatedAt", { precision: 3, mode: "date" })
+    createdAt: timestamp("createdAt", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt", { mode: "date" })
       .defaultNow()
       .$onUpdate(() => new Date()),
   },
@@ -689,7 +775,7 @@ export const inventoryManagement = pgTable(
     type: movementType("type").notNull(),
     quantity: integer("quantity").notNull(),
     reason: text("reason").notNull(),
-    location: skuLocation("location").notNull(),
+    storeId: varchar("storeId", { length: 32 }).notNull(),
     previousStock: integer("previousStock").notNull(),
     newStock: integer("newStock").notNull(),
     createdAt: timestamp("createdAt", { mode: "date" }).defaultNow().notNull(),
@@ -719,7 +805,7 @@ export const inventoryManagement = pgTable(
     index("idx_inventory_movement_variant").on(table.productVariantId),
     index("idx_inventory_movement_date").on(table.createdAt),
     index("idx_inventory_movement_order").on(table.orderId),
-    index("idx_inventory_movement_location").on(table.location),
+    index("idx_inventory_movement_storeId").on(table.storeId),
   ]
 )
 
