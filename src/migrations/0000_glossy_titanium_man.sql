@@ -211,7 +211,6 @@ CREATE TABLE "ProductVariant" (
 	"variantImage" text[],
 	"potency" "potency" DEFAULT 'NONE' NOT NULL,
 	"packSize" integer,
-	"stockByLocation" jsonb DEFAULT '[]'::jsonb NOT NULL,
 	"costPrice" double precision,
 	"mrp" double precision NOT NULL,
 	"discount" integer DEFAULT 0,
@@ -363,7 +362,6 @@ CREATE INDEX "idx_product_inventory_store" ON "ProductInventory" USING btree ("s
 CREATE INDEX "idx_product_inventory_stock" ON "ProductInventory" USING btree ("stock");--> statement-breakpoint
 CREATE INDEX "idx_product_inventory_lowstock" ON "ProductInventory" USING btree ("stock","lowStockThreshold");--> statement-breakpoint
 CREATE INDEX "idx_variant_sku" ON "ProductVariant" USING btree ("sku");--> statement-breakpoint
-CREATE INDEX "idx_variant_stock_location" ON "ProductVariant" USING btree ("stockByLocation");--> statement-breakpoint
 CREATE INDEX "idx_variant_search" ON "ProductVariant" USING btree ("productId","potency","packSize");--> statement-breakpoint
 CREATE INDEX "idx_variant_price" ON "ProductVariant" USING btree ("sellingPrice","mrp");--> statement-breakpoint
 CREATE INDEX "idx_variant_potency" ON "ProductVariant" USING btree ("potency");--> statement-breakpoint
@@ -374,7 +372,7 @@ CREATE INDEX "idx_store_name" ON "Store" USING btree ("name");--> statement-brea
 CREATE INDEX "idx_store_code" ON "Store" USING btree ("code");--> statement-breakpoint
 CREATE INDEX "idx_store_active" ON "Store" USING btree ("isActive");--> statement-breakpoint
 CREATE UNIQUE INDEX "TwoFactorConfirmation_userId_key" ON "TwoFactorConfirmation" USING btree ("userId");--> statement-breakpoint
-CREATE UNIQUE INDEX "TwoFactorToken_email_token_key" ON "TwoFactorToken" USING btree ("email","token");--> statement-breakpoint
+CREATE UNIQUE INDEX "TwoFactorToken_email_token_key" ON "TwoFactorToken" USING btree ("email");--> statement-breakpoint
 CREATE UNIQUE INDEX "TwoFactorToken_token_key" ON "TwoFactorToken" USING btree ("token");--> statement-breakpoint
 CREATE UNIQUE INDEX "User_email_key" ON "User" USING btree ("email");--> statement-breakpoint
 CREATE UNIQUE INDEX "VerificationToken_token_key" ON "VerificationToken" USING btree ("token");

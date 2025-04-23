@@ -193,13 +193,6 @@ export type Tag = typeof tag.$inferSelect
 export type Store = typeof store.$inferSelect
 export type AdminStoreAccess = typeof adminStoreAccess.$inferSelect
 export type AdminStoreSession = typeof adminStoreSession.$inferSelect
-
-export type StockByStoreId = {
-  storeId: string
-  stock: number
-}
-
-// Add productInventory type
 export type ProductInventory = typeof productInventory.$inferSelect
 
 export const store = pgTable(

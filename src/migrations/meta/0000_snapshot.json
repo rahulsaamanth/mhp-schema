@@ -1,5 +1,5 @@
 {
-  "id": "487563a2-734f-44d5-beb0-a442813c321e",
+  "id": "5ccd9236-33a9-416b-8a66-cbeb7b3975aa",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -2225,13 +2225,6 @@
           "primaryKey": false,
           "notNull": false
         },
-        "stockByLocation": {
-          "name": "stockByLocation",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'[]'::jsonb"
-        },
         "costPrice": {
           "name": "costPrice",
           "type": "double precision",
@@ -2286,21 +2279,6 @@
           "columns": [
             {
               "expression": "sku",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "idx_variant_stock_location": {
-          "name": "idx_variant_stock_location",
-          "columns": [
-            {
-              "expression": "stockByLocation",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -2851,12 +2829,6 @@
           "columns": [
             {
               "expression": "email",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "token",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
