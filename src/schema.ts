@@ -334,8 +334,7 @@ export const twoFactorToken = pgTable(
   (table) => [
     uniqueIndex("TwoFactorToken_email_token_key").using(
       "btree",
-      table.email.asc().nullsLast(),
-      table.token.asc().nullsLast()
+      table.email.asc().nullsLast()
     ),
     uniqueIndex("TwoFactorToken_token_key").using(
       "btree",
@@ -518,10 +517,7 @@ export const productVariant = pgTable(
     variantImage: text("variantImage").array(),
     potency: potency("potency").default("NONE").notNull(),
     packSize: integer("packSize"),
-    stockByLocation: jsonb("stockByLocation")
-      .$type<StockByStoreId[]>()
-      .notNull()
-      .default([]),
+
     costPrice: doublePrecision("costPrice"),
     mrp: doublePrecision("mrp").notNull(),
 
@@ -542,8 +538,7 @@ export const productVariant = pgTable(
       .onDelete("cascade")
       .onUpdate("cascade"),
     index("idx_variant_sku").on(table.sku),
-    index("idx_variant_stock_location").on(table.stockByLocation),
-
+    // Removing index on stockByLocation
     index("idx_variant_search").on(
       table.productId,
       table.potency,
