@@ -22,13 +22,13 @@
   "dependencies": {
     "@neondatabase/serverless": "^1.0.0",
     "dotenv": "^16.4.7",
-    "drizzle-orm": "^0.41.0",
+    "drizzle-orm": "^0.42.0",
     "next-auth": "^5.0.0-beta.25",
     "postgres": "^3.4.5"
   },
   "devDependencies": {
     "@types/node": "^22.13.14",
-    "drizzle-kit": "^0.30.6",
+    "drizzle-kit": "^0.31.0",
     "tsx": "^4.19.3",
     "typescript": "^5.8.2"
   },
