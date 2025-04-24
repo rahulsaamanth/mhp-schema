@@ -60,6 +60,7 @@ export const deliveryStatus = pgEnum("DeliveryStatus", [
   "DELIVERED",
   "CANCELLED",
   "RETURNED",
+  "IN_STORE_PICKUP",
 ])
 
 export const paymentType = pgEnum("PaymentType", [
@@ -68,6 +69,8 @@ export const paymentType = pgEnum("PaymentType", [
   "UPI",
   "NET_BANKING",
   "WALLET",
+  "CASH_ON_DELIVERY",
+  "IN_STORE",
 ])
 
 export const addressType = pgEnum("AddressType", ["SHIPPING", "BILLING"])
