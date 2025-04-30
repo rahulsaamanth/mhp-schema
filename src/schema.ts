@@ -31,6 +31,7 @@ const ENTITY_PREFIX = {
   INVENTORY: "INV",
   STORE: "STR",
   ADMIN_STORE: "ASTR",
+  DISCOUNT: "DISC",
 } as const
 
 export const customId = (name: string, prefix: string) =>
@@ -188,6 +189,7 @@ export type UserRole = (typeof userRole.enumValues)[number]
 export type User = typeof user.$inferSelect
 export type Order = typeof order.$inferSelect
 export type Product = typeof product.$inferSelect
+export type DiscountCode = typeof discountCode.$inferSelect
 
 export type Category = typeof category.$inferSelect
 export type Variant = typeof productVariant.$inferSelect
@@ -197,6 +199,29 @@ export type Store = typeof store.$inferSelect
 export type AdminStoreAccess = typeof adminStoreAccess.$inferSelect
 export type AdminStoreSession = typeof adminStoreSession.$inferSelect
 export type ProductInventory = typeof productInventory.$inferSelect
+
+export const discountCode = pgTable(
+  "DiscountCode",
+  {
+    id: customId("id", "DISC"),
+    code: varchar("code", { length: 50 }).notNull().unique(),
+    description: text("description"),
+    discountAmount: doublePrecision("discountAmount").notNull(),
+    discountType: discountType("discountType").default("PERCENTAGE").notNull(),
+    isActive: boolean("isActive").default(true).notNull(),
+    allProducts: boolean("allProducts").default(true).notNull(),
+    createdAt: timestamp("createdAt", { mode: "date" }).defaultNow().notNull(),
+    limit: integer("limit").default(0),
+    expiresAt: timestamp("expiresAt", { mode: "date" }),
+    usageCount: integer("usageCount").default(0),
+  },
+  (table) => [
+    index("idx_discount_code").on(table.code),
+    index("idx_discount_active").on(table.isActive),
+    index("idx_discount_expires").on(table.expiresAt),
+    index("idx_discount_usage").on(table.usageCount, table.limit),
+  ]
+)
 
 export const store = pgTable(
   "Store",
@@ -623,6 +648,7 @@ export const order = pgTable(
     isGuestOrder: boolean("isGuestOrder").default(false).notNull(),
 
     storeId: varchar("storeId", { length: 32 }),
+    discountCodeId: varchar("discountCodeId", { length: 32 }), // Added for discount code relation
 
     orderDate: timestamp("orderDate", {
       mode: "date",
@@ -687,6 +713,13 @@ export const order = pgTable(
       columns: [table.storeId],
       foreignColumns: [store.id],
       name: "Order_storeId_fkey",
+    })
+      .onUpdate("cascade")
+      .onDelete("set null"),
+    foreignKey({
+      columns: [table.discountCodeId],
+      foreignColumns: [discountCode.id],
+      name: "Order_discountCode_fkey",
     })
       .onUpdate("cascade")
       .onDelete("set null"),

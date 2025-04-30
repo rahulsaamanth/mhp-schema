@@ -18,6 +18,7 @@ import {
   adminStoreSession,
   inventoryManagement,
   productInventory,
+  discountCode,
 } from "./schema"
 
 export const accountRelations = relations(account, ({ one }) => ({
@@ -114,6 +115,10 @@ export const orderRelations = relations(order, ({ one, many }) => ({
   store: one(store, {
     fields: [order.storeId],
     references: [store.id],
+  }),
+  discountCode: one(discountCode, {
+    fields: [order.discountCodeId],
+    references: [discountCode.id],
   }),
   inventoryManagement: many(inventoryManagement),
 }))
@@ -244,3 +249,8 @@ export const productInventoryRelations = relations(
     }),
   })
 )
+
+// Discount Code Relations
+export const discountCodeRelations = relations(discountCode, ({ many }) => ({
+  orders: many(order),
+}))
