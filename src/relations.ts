@@ -11,7 +11,6 @@ import {
   orderDetails,
   review,
   address,
-  paymentMethod,
   cart,
   store,
   adminStoreAccess,
@@ -19,6 +18,7 @@ import {
   inventoryManagement,
   productInventory,
   discountCode,
+  payment,
 } from "./schema"
 
 export const accountRelations = relations(account, ({ one }) => ({
@@ -107,10 +107,6 @@ export const orderRelations = relations(order, ({ one, many }) => ({
   billingAddress: one(address, {
     fields: [order.billingAddressId],
     references: [address.id],
-  }),
-  paymentMethod: one(paymentMethod, {
-    fields: [order.paymentMethodId],
-    references: [paymentMethod.id],
   }),
   store: one(store, {
     fields: [order.storeId],
@@ -253,4 +249,12 @@ export const productInventoryRelations = relations(
 // Discount Code Relations
 export const discountCodeRelations = relations(discountCode, ({ many }) => ({
   orders: many(order),
+}))
+
+// Add payment relations
+export const paymentRelations = relations(payment, ({ one }) => ({
+  order: one(order, {
+    fields: [payment.orderId],
+    references: [order.id],
+  }),
 }))

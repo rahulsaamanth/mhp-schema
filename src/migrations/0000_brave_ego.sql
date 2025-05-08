@@ -1,10 +1,11 @@
 CREATE TYPE "public"."AddressType" AS ENUM('SHIPPING', 'BILLING');--> statement-breakpoint
-CREATE TYPE "public"."DeliveryStatus" AS ENUM('PROCESSING', 'SHIPPED', 'OUT_FOR_DELIVERY', 'DELIVERED', 'CANCELLED', 'RETURNED');--> statement-breakpoint
+CREATE TYPE "public"."DeliveryStatus" AS ENUM('PROCESSING', 'SHIPPED', 'OUT_FOR_DELIVERY', 'DELIVERED', 'CANCELLED', 'RETURNED', 'IN_STORE_PICKUP');--> statement-breakpoint
 CREATE TYPE "public"."discountType" AS ENUM('PERCENTAGE', 'FIXED');--> statement-breakpoint
 CREATE TYPE "public"."MovementType" AS ENUM('IN', 'OUT', 'ADJUSTMENT');--> statement-breakpoint
 CREATE TYPE "public"."OrderType" AS ENUM('OFFLINE', 'ONLINE');--> statement-breakpoint
+CREATE TYPE "public"."PaymentGateway" AS ENUM('RAZORPAY', 'PHONEPE');--> statement-breakpoint
 CREATE TYPE "public"."PaymentStatus" AS ENUM('PENDING', 'AUTHORIZED', 'PAID', 'FAILED', 'REFUNDED');--> statement-breakpoint
-CREATE TYPE "public"."PaymentType" AS ENUM('CREDIT_CARD', 'DEBIT_CARD', 'UPI', 'NET_BANKING', 'WALLET');--> statement-breakpoint
+CREATE TYPE "public"."PaymentType" AS ENUM('CREDIT_CARD', 'DEBIT_CARD', 'UPI', 'NET_BANKING', 'WALLET', 'CASH_ON_DELIVERY', 'IN_STORE');--> statement-breakpoint
 CREATE TYPE "public"."potency" AS ENUM('NONE', '1X', '2X', '3X', '6X', '12X', '30X', '200X', '3C', '6C', '12C', '30C', '200C', '1M', '10M', '50M', 'CM', '3CH', '6CH', '9CH', '12CH', '15CH', '30CH', '200CH', '1M CH', '10M CH', '50M CH', 'CM CH', 'Q', 'LM1', 'LM2', 'LM3', 'LM4', 'LM5', 'LM6', 'LM7', 'LM8', 'LM9', 'LM10', 'LM11', 'LM12', 'LM13', 'LM14', 'LM15', 'LM16', 'LM17', 'LM18', 'LM19', 'LM20', 'LM21', 'LM22', 'LM23', 'LM24', 'LM25', 'LM26', 'LM27', 'LM28', 'LM29', 'LM30', 'LM50');--> statement-breakpoint
 CREATE TYPE "public"."ProductForm" AS ENUM('NONE', 'DILUTIONS(P)', 'MOTHER_TINCTURES(Q)', 'TRITURATIONS', 'TABLETS', 'GLOBULES', 'BIO_CHEMIC', 'BIO_COMBINATION', 'OINTMENT', 'GEL', 'CREAM', 'SYRUP/TONIC', 'DROPS', 'EYE_DROPS', 'EAR_DROPS', 'NASAL_DROPS', 'INJECTIONS');--> statement-breakpoint
 CREATE TYPE "public"."ProductStatus" AS ENUM('ACTIVE', 'DRAFT', 'ARCHIVED');--> statement-breakpoint
@@ -84,6 +85,23 @@ CREATE TABLE "Category" (
 	CONSTRAINT "Category_id_unique" UNIQUE("id")
 );
 --> statement-breakpoint
+CREATE TABLE "DiscountCode" (
+	"id" varchar(32) PRIMARY KEY NOT NULL,
+	"code" varchar(50) NOT NULL,
+	"description" text,
+	"discountAmount" double precision NOT NULL,
+	"discountType" "discountType" DEFAULT 'PERCENTAGE' NOT NULL,
+	"isActive" boolean DEFAULT true NOT NULL,
+	"allProducts" boolean DEFAULT true NOT NULL,
+	"minimumOrderValue" double precision DEFAULT 0,
+	"createdAt" timestamp DEFAULT now() NOT NULL,
+	"limit" integer DEFAULT 0,
+	"expiresAt" timestamp,
+	"usageCount" integer DEFAULT 0,
+	CONSTRAINT "DiscountCode_id_unique" UNIQUE("id"),
+	CONSTRAINT "DiscountCode_code_unique" UNIQUE("code")
+);
+--> statement-breakpoint
 CREATE TABLE "InventoryManagement" (
 	"id" varchar(32) PRIMARY KEY NOT NULL,
 	"productVariantId" varchar(32) NOT NULL,
@@ -113,6 +131,7 @@ CREATE TABLE "Order" (
 	"customerEmail" text,
 	"isGuestOrder" boolean DEFAULT false NOT NULL,
 	"storeId" varchar(32),
+	"discountCodeId" varchar(32),
 	"orderDate" timestamp DEFAULT now() NOT NULL,
 	"subtotal" double precision NOT NULL,
 	"shippingCost" double precision DEFAULT 0 NOT NULL,
@@ -131,7 +150,6 @@ CREATE TABLE "Order" (
 	"cancellationReason" text,
 	"estimatedDeliveryDate" timestamp,
 	"deliveredAt" timestamp,
-	"paymentMethodId" varchar(32),
 	CONSTRAINT "Order_id_unique" UNIQUE("id")
 );
 --> statement-breakpoint
@@ -158,6 +176,25 @@ CREATE TABLE "PasswordResetToken" (
 	"token" text NOT NULL,
 	"expires" timestamp NOT NULL,
 	CONSTRAINT "PasswordResetToken_id_unique" UNIQUE("id")
+);
+--> statement-breakpoint
+CREATE TABLE "Payment" (
+	"id" varchar(32) PRIMARY KEY NOT NULL,
+	"orderId" varchar(32) NOT NULL,
+	"amount" double precision NOT NULL,
+	"currency" varchar(3) DEFAULT 'INR' NOT NULL,
+	"status" "PaymentStatus" DEFAULT 'PENDING' NOT NULL,
+	"paymentType" "PaymentType" NOT NULL,
+	"gateway" "PaymentGateway",
+	"gatewayOrderId" text,
+	"gatewayPaymentId" text,
+	"gatewayResponse" jsonb,
+	"merchantTransactionId" text,
+	"errorCode" varchar(100),
+	"errorDescription" text,
+	"createdAt" timestamp DEFAULT now() NOT NULL,
+	"updatedAt" timestamp DEFAULT now(),
+	CONSTRAINT "Payment_id_unique" UNIQUE("id")
 );
 --> statement-breakpoint
 CREATE TABLE "PaymentMethod" (
@@ -309,10 +346,11 @@ ALTER TABLE "InventoryManagement" ADD CONSTRAINT "InventoryManagement_createdBy_
 ALTER TABLE "Order" ADD CONSTRAINT "Order_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE "Order" ADD CONSTRAINT "Order_shippingAddress_fkey" FOREIGN KEY ("shippingAddressId") REFERENCES "public"."Address"("id") ON DELETE restrict ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE "Order" ADD CONSTRAINT "Order_billingAddress_fkey" FOREIGN KEY ("billingAddressId") REFERENCES "public"."Address"("id") ON DELETE restrict ON UPDATE cascade;--> statement-breakpoint
-ALTER TABLE "Order" ADD CONSTRAINT "Order_paymentMethod_fkey" FOREIGN KEY ("paymentMethodId") REFERENCES "public"."PaymentMethod"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "Order" ADD CONSTRAINT "Order_storeId_fkey" FOREIGN KEY ("storeId") REFERENCES "public"."Store"("id") ON DELETE set null ON UPDATE cascade;--> statement-breakpoint
+ALTER TABLE "Order" ADD CONSTRAINT "Order_discountCode_fkey" FOREIGN KEY ("discountCodeId") REFERENCES "public"."DiscountCode"("id") ON DELETE set null ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE "OrderDetails" ADD CONSTRAINT "OrderDetails_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "public"."Order"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE "OrderDetails" ADD CONSTRAINT "OrderDetails_productVariantId_fkey" FOREIGN KEY ("productVariantId") REFERENCES "public"."ProductVariant"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
+ALTER TABLE "Payment" ADD CONSTRAINT "Payment_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "public"."Order"("id") ON DELETE restrict ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE "PaymentMethod" ADD CONSTRAINT "PaymentMethod_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE "Product" ADD CONSTRAINT "Product_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "public"."Category"("id") ON DELETE restrict ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE "Product" ADD CONSTRAINT "Product_manufacturerId_fkey" FOREIGN KEY ("manufacturerId") REFERENCES "public"."Manufacturer"("id") ON DELETE restrict ON UPDATE cascade;--> statement-breakpoint
@@ -336,6 +374,10 @@ CREATE INDEX "idx_category_tree" ON "Category" USING btree ("id","parentId");-->
 CREATE INDEX "idx_category_parent" ON "Category" USING btree ("parentId");--> statement-breakpoint
 CREATE INDEX "idx_category_path" ON "Category" USING btree ("path");--> statement-breakpoint
 CREATE INDEX "idx_category_depth" ON "Category" USING btree ("depth");--> statement-breakpoint
+CREATE INDEX "idx_discount_code" ON "DiscountCode" USING btree ("code");--> statement-breakpoint
+CREATE INDEX "idx_discount_active" ON "DiscountCode" USING btree ("isActive");--> statement-breakpoint
+CREATE INDEX "idx_discount_expires" ON "DiscountCode" USING btree ("expiresAt");--> statement-breakpoint
+CREATE INDEX "idx_discount_usage" ON "DiscountCode" USING btree ("usageCount","limit");--> statement-breakpoint
 CREATE INDEX "idx_inventory_movement_variant" ON "InventoryManagement" USING btree ("productVariantId");--> statement-breakpoint
 CREATE INDEX "idx_inventory_movement_date" ON "InventoryManagement" USING btree ("createdAt");--> statement-breakpoint
 CREATE INDEX "idx_inventory_movement_order" ON "InventoryManagement" USING btree ("orderId");--> statement-breakpoint
@@ -349,6 +391,11 @@ CREATE INDEX "order_payment_delivery_status_idx" ON "Order" USING btree ("paymen
 CREATE INDEX "order_details_fulfillment_idx" ON "OrderDetails" USING btree ("fulfilledFromStoreId");--> statement-breakpoint
 CREATE UNIQUE INDEX "PasswordResetToken_email_token_key" ON "PasswordResetToken" USING btree ("email","token");--> statement-breakpoint
 CREATE UNIQUE INDEX "PasswordResetToken_token_key" ON "PasswordResetToken" USING btree ("token");--> statement-breakpoint
+CREATE INDEX "idx_payment_order" ON "Payment" USING btree ("orderId");--> statement-breakpoint
+CREATE INDEX "idx_payment_status" ON "Payment" USING btree ("status");--> statement-breakpoint
+CREATE INDEX "idx_payment_type" ON "Payment" USING btree ("paymentType");--> statement-breakpoint
+CREATE INDEX "idx_payment_gateway" ON "Payment" USING btree ("gateway");--> statement-breakpoint
+CREATE INDEX "idx_payment_created" ON "Payment" USING btree ("createdAt");--> statement-breakpoint
 CREATE INDEX "PaymentMethod_userId_index" ON "PaymentMethod" USING btree ("userId");--> statement-breakpoint
 CREATE INDEX "product_name_idx" ON "Product" USING btree ("name");--> statement-breakpoint
 CREATE INDEX "product_status_idx" ON "Product" USING btree ("status");--> statement-breakpoint

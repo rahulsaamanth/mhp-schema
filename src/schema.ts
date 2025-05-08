@@ -64,6 +64,8 @@ export const deliveryStatus = pgEnum("DeliveryStatus", [
   "IN_STORE_PICKUP",
 ])
 
+export const paymentGateway = pgEnum("PaymentGateway", ["RAZORPAY", "PHONEPE"])
+
 export const paymentType = pgEnum("PaymentType", [
   "CREDIT_CARD",
   "DEBIT_CARD",
@@ -210,6 +212,7 @@ export const discountCode = pgTable(
     discountType: discountType("discountType").default("PERCENTAGE").notNull(),
     isActive: boolean("isActive").default(true).notNull(),
     allProducts: boolean("allProducts").default(true).notNull(),
+    minimumOrderValue: doublePrecision("minimumOrderValue").default(0),
     createdAt: timestamp("createdAt", { mode: "date" }).defaultNow().notNull(),
     limit: integer("limit").default(0),
     expiresAt: timestamp("expiresAt", { mode: "date" }),
@@ -636,6 +639,51 @@ export const paymentMethod = pgTable(
   ]
 )
 
+export const payment = pgTable(
+  "Payment",
+  {
+    id: customId("id", ENTITY_PREFIX.PAYMENT),
+    orderId: varchar("orderId", { length: 32 }).notNull(),
+
+    // Payment details
+    amount: doublePrecision("amount").notNull(),
+    currency: varchar("currency", { length: 3 }).default("INR").notNull(),
+    status: paymentStatus("status").default("PENDING").notNull(),
+    paymentType: paymentType("paymentType").notNull(),
+
+    // Online payment gateway specific fields
+    gateway: paymentGateway("gateway"),
+    gatewayOrderId: text("gatewayOrderId"),
+    gatewayPaymentId: text("gatewayPaymentId"),
+    gatewayResponse: jsonb("gatewayResponse"),
+    merchantTransactionId: text("merchantTransactionId"),
+
+    // Error handling
+    errorCode: varchar("errorCode", { length: 100 }),
+    errorDescription: text("errorDescription"),
+
+    // Audit fields
+    createdAt: timestamp("createdAt", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt", { mode: "date" })
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.orderId],
+      foreignColumns: [order.id],
+      name: "Payment_orderId_fkey",
+    })
+      .onUpdate("cascade")
+      .onDelete("restrict"),
+    index("idx_payment_order").on(table.orderId),
+    index("idx_payment_status").on(table.status),
+    index("idx_payment_type").on(table.paymentType),
+    index("idx_payment_gateway").on(table.gateway),
+    index("idx_payment_created").on(table.createdAt),
+  ]
+)
+
 export const order = pgTable(
   "Order",
   {
@@ -679,8 +727,6 @@ export const order = pgTable(
 
     estimatedDeliveryDate: timestamp("estimatedDeliveryDate", { mode: "date" }),
     deliveredAt: timestamp("deliveredAt", { mode: "date" }),
-    // payment method is mandatory, but not required for now.
-    paymentMethodId: varchar("paymentMethodId", { length: 32 }),
   },
   (table) => [
     foreignKey({
@@ -704,11 +750,6 @@ export const order = pgTable(
     })
       .onUpdate("cascade")
       .onDelete("restrict"),
-    foreignKey({
-      columns: [table.paymentMethodId],
-      foreignColumns: [paymentMethod.id],
-      name: "Order_paymentMethod_fkey",
-    }),
     foreignKey({
       columns: [table.storeId],
       foreignColumns: [store.id],
