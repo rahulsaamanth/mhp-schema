@@ -197,18 +197,6 @@ CREATE TABLE "Payment" (
 	CONSTRAINT "Payment_id_unique" UNIQUE("id")
 );
 --> statement-breakpoint
-CREATE TABLE "PaymentMethod" (
-	"id" varchar(32) PRIMARY KEY NOT NULL,
-	"userId" varchar(32) NOT NULL,
-	"paymentType" "PaymentType" NOT NULL,
-	"isDefault" boolean DEFAULT false NOT NULL,
-	"paymentDetails" jsonb NOT NULL,
-	"displayDetails" jsonb NOT NULL,
-	"createdAt" timestamp DEFAULT now() NOT NULL,
-	"updatedAt" timestamp DEFAULT now(),
-	CONSTRAINT "PaymentMethod_id_unique" UNIQUE("id")
-);
---> statement-breakpoint
 CREATE TABLE "Product" (
 	"id" varchar(32) PRIMARY KEY NOT NULL,
 	"name" text NOT NULL,
@@ -351,7 +339,6 @@ ALTER TABLE "Order" ADD CONSTRAINT "Order_discountCode_fkey" FOREIGN KEY ("disco
 ALTER TABLE "OrderDetails" ADD CONSTRAINT "OrderDetails_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "public"."Order"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE "OrderDetails" ADD CONSTRAINT "OrderDetails_productVariantId_fkey" FOREIGN KEY ("productVariantId") REFERENCES "public"."ProductVariant"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE "Payment" ADD CONSTRAINT "Payment_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "public"."Order"("id") ON DELETE restrict ON UPDATE cascade;--> statement-breakpoint
-ALTER TABLE "PaymentMethod" ADD CONSTRAINT "PaymentMethod_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE "Product" ADD CONSTRAINT "Product_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "public"."Category"("id") ON DELETE restrict ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE "Product" ADD CONSTRAINT "Product_manufacturerId_fkey" FOREIGN KEY ("manufacturerId") REFERENCES "public"."Manufacturer"("id") ON DELETE restrict ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE "ProductInventory" ADD CONSTRAINT "ProductInventory_variantId_fkey" FOREIGN KEY ("productVariantId") REFERENCES "public"."ProductVariant"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
@@ -396,7 +383,6 @@ CREATE INDEX "idx_payment_status" ON "Payment" USING btree ("status");--> statem
 CREATE INDEX "idx_payment_type" ON "Payment" USING btree ("paymentType");--> statement-breakpoint
 CREATE INDEX "idx_payment_gateway" ON "Payment" USING btree ("gateway");--> statement-breakpoint
 CREATE INDEX "idx_payment_created" ON "Payment" USING btree ("createdAt");--> statement-breakpoint
-CREATE INDEX "PaymentMethod_userId_index" ON "PaymentMethod" USING btree ("userId");--> statement-breakpoint
 CREATE INDEX "product_name_idx" ON "Product" USING btree ("name");--> statement-breakpoint
 CREATE INDEX "product_status_idx" ON "Product" USING btree ("status");--> statement-breakpoint
 CREATE INDEX "product_category_idx" ON "Product" USING btree ("categoryId");--> statement-breakpoint

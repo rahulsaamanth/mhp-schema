@@ -1,5 +1,5 @@
 {
-  "id": "ec96a32f-f71e-4097-9875-44d88b093076",
+  "id": "90704f92-6b04-408b-90d9-e3f504c3955d",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -2007,109 +2007,6 @@
       "uniqueConstraints": {
         "Payment_id_unique": {
           "name": "Payment_id_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "id"
-          ]
-        }
-      },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.PaymentMethod": {
-      "name": "PaymentMethod",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(32)",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "userId": {
-          "name": "userId",
-          "type": "varchar(32)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "paymentType": {
-          "name": "paymentType",
-          "type": "PaymentType",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "isDefault": {
-          "name": "isDefault",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "paymentDetails": {
-          "name": "paymentDetails",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "displayDetails": {
-          "name": "displayDetails",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updatedAt": {
-          "name": "updatedAt",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "PaymentMethod_userId_index": {
-          "name": "PaymentMethod_userId_index",
-          "columns": [
-            {
-              "expression": "userId",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "PaymentMethod_userId_fkey": {
-          "name": "PaymentMethod_userId_fkey",
-          "tableFrom": "PaymentMethod",
-          "tableTo": "User",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "PaymentMethod_id_unique": {
-          "name": "PaymentMethod_id_unique",
           "nullsNotDistinct": false,
           "columns": [
             "id"
