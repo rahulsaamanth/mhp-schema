@@ -1,5 +1,5 @@
 {
-  "id": "90704f92-6b04-408b-90d9-e3f504c3955d",
+  "id": "9cf3a9dc-42d3-4204-a965-30aaf6498241",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -1327,14 +1327,8 @@
           "notNull": true,
           "default": "'PROCESSING'"
         },
-        "shippingAddressId": {
-          "name": "shippingAddressId",
-          "type": "varchar(32)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "billingAddressId": {
-          "name": "billingAddressId",
+        "addressId": {
+          "name": "addressId",
           "type": "varchar(32)",
           "primaryKey": false,
           "notNull": true
@@ -1514,25 +1508,12 @@
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
-        "Order_shippingAddress_fkey": {
-          "name": "Order_shippingAddress_fkey",
+        "Order_address_fkey": {
+          "name": "Order_address_fkey",
           "tableFrom": "Order",
           "tableTo": "Address",
           "columnsFrom": [
-            "shippingAddressId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "restrict",
-          "onUpdate": "cascade"
-        },
-        "Order_billingAddress_fkey": {
-          "name": "Order_billingAddress_fkey",
-          "tableFrom": "Order",
-          "tableTo": "Address",
-          "columnsFrom": [
-            "billingAddressId"
+            "addressId"
           ],
           "columnsTo": [
             "id"
@@ -3318,8 +3299,7 @@
       "name": "AddressType",
       "schema": "public",
       "values": [
-        "SHIPPING",
-        "BILLING"
+        "SHIPPING"
       ]
     },
     "public.DeliveryStatus": {

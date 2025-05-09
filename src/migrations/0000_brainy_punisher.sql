@@ -1,4 +1,4 @@
-CREATE TYPE "public"."AddressType" AS ENUM('SHIPPING', 'BILLING');--> statement-breakpoint
+CREATE TYPE "public"."AddressType" AS ENUM('SHIPPING');--> statement-breakpoint
 CREATE TYPE "public"."DeliveryStatus" AS ENUM('PROCESSING', 'SHIPPED', 'OUT_FOR_DELIVERY', 'DELIVERED', 'CANCELLED', 'RETURNED', 'IN_STORE_PICKUP');--> statement-breakpoint
 CREATE TYPE "public"."discountType" AS ENUM('PERCENTAGE', 'FIXED');--> statement-breakpoint
 CREATE TYPE "public"."MovementType" AS ENUM('IN', 'OUT', 'ADJUSTMENT');--> statement-breakpoint
@@ -140,8 +140,7 @@ CREATE TABLE "Order" (
 	"totalAmountPaid" double precision NOT NULL,
 	"orderType" "OrderType" DEFAULT 'ONLINE' NOT NULL,
 	"deliveryStatus" "DeliveryStatus" DEFAULT 'PROCESSING' NOT NULL,
-	"shippingAddressId" varchar(32) NOT NULL,
-	"billingAddressId" varchar(32) NOT NULL,
+	"addressId" varchar(32) NOT NULL,
 	"paymentStatus" "PaymentStatus" DEFAULT 'PENDING' NOT NULL,
 	"paymentIntentId" varchar(100),
 	"invoiceNumber" varchar(50),
@@ -332,8 +331,7 @@ ALTER TABLE "InventoryManagement" ADD CONSTRAINT "InventoryManagement_productVar
 ALTER TABLE "InventoryManagement" ADD CONSTRAINT "InventoryManagement_orderId_Order_id_fk" FOREIGN KEY ("orderId") REFERENCES "public"."Order"("id") ON DELETE set null ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE "InventoryManagement" ADD CONSTRAINT "InventoryManagement_createdBy_User_id_fk" FOREIGN KEY ("createdBy") REFERENCES "public"."User"("id") ON DELETE restrict ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE "Order" ADD CONSTRAINT "Order_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
-ALTER TABLE "Order" ADD CONSTRAINT "Order_shippingAddress_fkey" FOREIGN KEY ("shippingAddressId") REFERENCES "public"."Address"("id") ON DELETE restrict ON UPDATE cascade;--> statement-breakpoint
-ALTER TABLE "Order" ADD CONSTRAINT "Order_billingAddress_fkey" FOREIGN KEY ("billingAddressId") REFERENCES "public"."Address"("id") ON DELETE restrict ON UPDATE cascade;--> statement-breakpoint
+ALTER TABLE "Order" ADD CONSTRAINT "Order_address_fkey" FOREIGN KEY ("addressId") REFERENCES "public"."Address"("id") ON DELETE restrict ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE "Order" ADD CONSTRAINT "Order_storeId_fkey" FOREIGN KEY ("storeId") REFERENCES "public"."Store"("id") ON DELETE set null ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE "Order" ADD CONSTRAINT "Order_discountCode_fkey" FOREIGN KEY ("discountCodeId") REFERENCES "public"."DiscountCode"("id") ON DELETE set null ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE "OrderDetails" ADD CONSTRAINT "OrderDetails_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "public"."Order"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
