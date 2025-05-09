@@ -100,12 +100,8 @@ export const orderRelations = relations(order, ({ one, many }) => ({
     references: [user.id],
   }),
   orderDetails: many(orderDetails),
-  shippingAddres: one(address, {
-    fields: [order.shippingAddressId],
-    references: [address.id],
-  }),
-  billingAddress: one(address, {
-    fields: [order.billingAddressId],
+  address: one(address, {
+    fields: [order.addressId],
     references: [address.id],
   }),
   store: one(store, {
@@ -146,11 +142,8 @@ export const addressRelations = relations(address, ({ one, many }) => ({
     fields: [address.userId],
     references: [user.id],
   }),
-  shippingOrders: many(order, {
-    relationName: "order_shipping_address",
-  }),
-  billingOrders: many(order, {
-    relationName: "order_billing_address",
+  orders: many(order, {
+    relationName: "order_address",
   }),
 }))
 

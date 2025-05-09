@@ -76,7 +76,7 @@ export const paymentType = pgEnum("PaymentType", [
   "IN_STORE",
 ])
 
-export const addressType = pgEnum("AddressType", ["SHIPPING", "BILLING"])
+export const addressType = pgEnum("AddressType", ["SHIPPING"])
 
 export const productStatus = pgEnum("ProductStatus", [
   "ACTIVE",
@@ -688,8 +688,7 @@ export const order = pgTable(
     deliveryStatus: deliveryStatus("deliveryStatus")
       .default("PROCESSING")
       .notNull(),
-    shippingAddressId: varchar("shippingAddressId", { length: 32 }).notNull(),
-    billingAddressId: varchar("billingAddressId", { length: 32 }).notNull(),
+    addressId: varchar("addressId", { length: 32 }).notNull(),
 
     paymentStatus: paymentStatus("paymentStatus").default("PENDING").notNull(),
     paymentIntentId: varchar("paymentIntentId", { length: 100 }),
@@ -711,16 +710,9 @@ export const order = pgTable(
       .onUpdate("cascade")
       .onDelete("cascade"),
     foreignKey({
-      columns: [table.shippingAddressId],
+      columns: [table.addressId],
       foreignColumns: [address.id],
-      name: "Order_shippingAddress_fkey",
-    })
-      .onUpdate("cascade")
-      .onDelete("restrict"),
-    foreignKey({
-      columns: [table.billingAddressId],
-      foreignColumns: [address.id],
-      name: "Order_billingAddress_fkey",
+      name: "Order_address_fkey",
     })
       .onUpdate("cascade")
       .onDelete("restrict"),
