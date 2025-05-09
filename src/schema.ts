@@ -613,32 +613,6 @@ export const productInventory = pgTable(
   ]
 )
 
-export const paymentMethod = pgTable(
-  "PaymentMethod",
-  {
-    id: customId("id", ENTITY_PREFIX.PAYMENT),
-    userId: varchar("userId", { length: 32 }).notNull(),
-    paymentType: paymentType("paymentType").notNull(),
-    isDefault: boolean("isDefault").default(false).notNull(),
-    paymentDetails: jsonb("paymentDetails").notNull(),
-    displayDetails: jsonb("displayDetails").notNull(),
-    createdAt: timestamp("createdAt", { mode: "date" }).defaultNow().notNull(),
-    updatedAt: timestamp("updatedAt", { mode: "date" })
-      .defaultNow()
-      .$onUpdate(() => new Date()),
-  },
-  (table) => [
-    foreignKey({
-      columns: [table.userId],
-      foreignColumns: [user.id],
-      name: "PaymentMethod_userId_fkey",
-    })
-      .onDelete("cascade")
-      .onUpdate("cascade"),
-    index("PaymentMethod_userId_index").on(table.userId),
-  ]
-)
-
 export const payment = pgTable(
   "Payment",
   {
