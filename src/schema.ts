@@ -205,7 +205,7 @@ export type ProductInventory = typeof productInventory.$inferSelect
 export const discountCode = pgTable(
   "DiscountCode",
   {
-    id: customId("id", "DISC"),
+    id: customId("id", ENTITY_PREFIX.DISCOUNT),
     code: varchar("code", { length: 50 }).notNull().unique(),
     description: text("description"),
     discountAmount: doublePrecision("discountAmount").notNull(),
