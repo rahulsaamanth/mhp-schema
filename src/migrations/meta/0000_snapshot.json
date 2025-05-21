@@ -1,5 +1,5 @@
 {
-  "id": "06b0a68b-09f8-40ef-a072-0637fa76d388",
+  "id": "d54f64bd-2b97-46ea-9b72-87cb70328a14",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -1271,13 +1271,6 @@
           "primaryKey": false,
           "notNull": false
         },
-        "orderDate": {
-          "name": "orderDate",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
         "subtotal": {
           "name": "subtotal",
           "type": "double precision",
@@ -1382,6 +1375,20 @@
           "type": "timestamp",
           "primaryKey": false,
           "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
         }
       },
       "indexes": {
@@ -1404,7 +1411,7 @@
           "name": "order_date_status_idx",
           "columns": [
             {
-              "expression": "orderDate",
+              "expression": "createdAt",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -1431,7 +1438,22 @@
               "nulls": "last"
             },
             {
-              "expression": "orderDate",
+              "expression": "createdAt",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "order_updated_at_idx": {
+          "name": "order_updated_at_idx",
+          "columns": [
+            {
+              "expression": "updatedAt",
               "isExpression": false,
               "asc": true,
               "nulls": "last"

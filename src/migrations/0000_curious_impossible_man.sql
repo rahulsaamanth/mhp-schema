@@ -132,7 +132,6 @@ CREATE TABLE "Order" (
 	"isGuestOrder" boolean DEFAULT false NOT NULL,
 	"storeId" varchar(32),
 	"discountCodeId" varchar(32),
-	"orderDate" timestamp DEFAULT now() NOT NULL,
 	"subtotal" double precision NOT NULL,
 	"shippingCost" double precision DEFAULT 0 NOT NULL,
 	"discount" double precision DEFAULT 0 NOT NULL,
@@ -149,6 +148,8 @@ CREATE TABLE "Order" (
 	"cancellationReason" text,
 	"estimatedDeliveryDate" timestamp,
 	"deliveredAt" timestamp,
+	"createdAt" timestamp DEFAULT now() NOT NULL,
+	"updatedAt" timestamp DEFAULT now(),
 	CONSTRAINT "Order_id_unique" UNIQUE("id")
 );
 --> statement-breakpoint
@@ -368,8 +369,9 @@ CREATE INDEX "idx_inventory_movement_date" ON "InventoryManagement" USING btree 
 CREATE INDEX "idx_inventory_movement_order" ON "InventoryManagement" USING btree ("orderId");--> statement-breakpoint
 CREATE INDEX "idx_inventory_movement_storeId" ON "InventoryManagement" USING btree ("storeId");--> statement-breakpoint
 CREATE INDEX "order_store_idx" ON "Order" USING btree ("storeId");--> statement-breakpoint
-CREATE INDEX "order_date_status_idx" ON "Order" USING btree ("orderDate","deliveryStatus");--> statement-breakpoint
-CREATE INDEX "order_user_date_idx" ON "Order" USING btree ("userId","orderDate");--> statement-breakpoint
+CREATE INDEX "order_date_status_idx" ON "Order" USING btree ("createdAt","deliveryStatus");--> statement-breakpoint
+CREATE INDEX "order_user_date_idx" ON "Order" USING btree ("userId","createdAt");--> statement-breakpoint
+CREATE INDEX "order_updated_at_idx" ON "Order" USING btree ("updatedAt");--> statement-breakpoint
 CREATE INDEX "order_payment_status_idx" ON "Order" USING btree ("paymentStatus");--> statement-breakpoint
 CREATE INDEX "order_invoice_number_idx" ON "Order" USING btree ("invoiceNumber");--> statement-breakpoint
 CREATE INDEX "order_payment_delivery_status_idx" ON "Order" USING btree ("paymentStatus","deliveryStatus");--> statement-breakpoint

@@ -733,6 +733,7 @@ export const order = pgTable(
     index("order_store_idx").on(table.storeId),
     index("order_date_status_idx").on(table.createdAt, table.deliveryStatus),
     index("order_user_date_idx").on(table.userId, table.createdAt),
+    index("order_updated_at_idx").on(table.updatedAt),
     index("order_payment_status_idx").on(table.paymentStatus),
     index("order_invoice_number_idx").on(table.invoiceNumber),
     index("order_payment_delivery_status_idx").on(
