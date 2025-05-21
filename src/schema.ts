@@ -13,6 +13,7 @@ import {
   integer,
 } from "drizzle-orm/pg-core"
 import type { AdapterAccountType } from "@auth/core/adapters"
+import { time } from "console"
 
 const ENTITY_PREFIX = {
   USER: "USR",
@@ -672,12 +673,6 @@ export const order = pgTable(
     storeId: varchar("storeId", { length: 32 }),
     discountCodeId: varchar("discountCodeId", { length: 32 }), // Added for discount code relation
 
-    orderDate: timestamp("orderDate", {
-      mode: "date",
-    })
-      .defaultNow()
-      .notNull(),
-
     subtotal: doublePrecision("subtotal").notNull(),
     shippingCost: doublePrecision("shippingCost").default(0).notNull(),
     discount: doublePrecision("discount").default(0).notNull(),
@@ -700,6 +695,11 @@ export const order = pgTable(
 
     estimatedDeliveryDate: timestamp("estimatedDeliveryDate", { mode: "date" }),
     deliveredAt: timestamp("deliveredAt", { mode: "date" }),
+
+    createdAt: timestamp("createdAt", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt", { mode: "date" })
+      .defaultNow()
+      .$onUpdate(() => new Date()),
   },
   (table) => [
     foreignKey({
@@ -731,8 +731,8 @@ export const order = pgTable(
       .onUpdate("cascade")
       .onDelete("set null"),
     index("order_store_idx").on(table.storeId),
-    index("order_date_status_idx").on(table.orderDate, table.deliveryStatus),
-    index("order_user_date_idx").on(table.userId, table.orderDate),
+    index("order_date_status_idx").on(table.createdAt, table.deliveryStatus),
+    index("order_user_date_idx").on(table.userId, table.createdAt),
     index("order_payment_status_idx").on(table.paymentStatus),
     index("order_invoice_number_idx").on(table.invoiceNumber),
     index("order_payment_delivery_status_idx").on(
