@@ -38,6 +38,7 @@ CREATE TABLE "Address" (
 	"addressType" "AddressType" DEFAULT 'SHIPPING' NOT NULL,
 	"createdAt" timestamp DEFAULT now() NOT NULL,
 	"updatedAt" timestamp DEFAULT now(),
+	"isDefault" boolean DEFAULT false NOT NULL,
 	CONSTRAINT "Address_id_unique" UNIQUE("id")
 );
 --> statement-breakpoint

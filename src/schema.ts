@@ -830,6 +830,7 @@ export const address = pgTable(
     updatedAt: timestamp("updatedAt", { mode: "date" })
       .defaultNow()
       .$onUpdate(() => new Date()),
+    isDefault: boolean("isDefault").default(false).notNull(),
   },
   (table) => [
     foreignKey({

@@ -1,5 +1,5 @@
 {
-  "id": "d54f64bd-2b97-46ea-9b72-87cb70328a14",
+  "id": "4be3d653-0b80-4c82-ba7b-22a3ba58e1dc",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -201,6 +201,13 @@
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
+        },
+        "isDefault": {
+          "name": "isDefault",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
         }
       },
       "indexes": {
