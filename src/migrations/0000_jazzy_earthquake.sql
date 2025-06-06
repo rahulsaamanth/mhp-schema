@@ -1,4 +1,5 @@
 CREATE TYPE "public"."AddressType" AS ENUM('SHIPPING');--> statement-breakpoint
+CREATE TYPE "public"."AdminViewStatus" AS ENUM('NEW', 'OPENED', 'PROCESSING', 'CLOSED');--> statement-breakpoint
 CREATE TYPE "public"."DeliveryStatus" AS ENUM('PROCESSING', 'SHIPPED', 'OUT_FOR_DELIVERY', 'DELIVERED', 'CANCELLED', 'RETURNED', 'IN_STORE_PICKUP');--> statement-breakpoint
 CREATE TYPE "public"."discountType" AS ENUM('PERCENTAGE', 'FIXED');--> statement-breakpoint
 CREATE TYPE "public"."MovementType" AS ENUM('IN', 'OUT', 'ADJUSTMENT');--> statement-breakpoint
@@ -10,7 +11,7 @@ CREATE TYPE "public"."potency" AS ENUM('NONE', '1X', '2X', '3X', '6X', '12X', '3
 CREATE TYPE "public"."ProductForm" AS ENUM('NONE', 'DILUTIONS(P)', 'MOTHER_TINCTURES(Q)', 'TRITURATIONS', 'TABLETS', 'GLOBULES', 'BIO_CHEMIC', 'BIO_COMBINATION', 'OINTMENT', 'GEL', 'CREAM', 'SYRUP/TONIC', 'DROPS', 'EYE_DROPS', 'EAR_DROPS', 'NASAL_DROPS', 'INJECTIONS');--> statement-breakpoint
 CREATE TYPE "public"."ProductStatus" AS ENUM('ACTIVE', 'DRAFT', 'ARCHIVED');--> statement-breakpoint
 CREATE TYPE "public"."UnitOfMeasure" AS ENUM('NONE', 'TABLETS', 'ML', 'GM(s)', 'DROPS', 'AMPOULES');--> statement-breakpoint
-CREATE TYPE "public"."UserRole" AS ENUM('ADMIN', 'USER', 'STORE_ADMIN');--> statement-breakpoint
+CREATE TYPE "public"."UserRole" AS ENUM('ADMIN', 'USER');--> statement-breakpoint
 CREATE TABLE "Account" (
 	"id" varchar(32) PRIMARY KEY NOT NULL,
 	"userId" varchar(32) NOT NULL,
@@ -40,27 +41,6 @@ CREATE TABLE "Address" (
 	"updatedAt" timestamp DEFAULT now(),
 	"isDefault" boolean DEFAULT false NOT NULL,
 	CONSTRAINT "Address_id_unique" UNIQUE("id")
-);
---> statement-breakpoint
-CREATE TABLE "AdminStoreAccess" (
-	"id" varchar(32) PRIMARY KEY NOT NULL,
-	"userId" varchar(32) NOT NULL,
-	"storeId" varchar(32) NOT NULL,
-	"canManageInventory" boolean DEFAULT true NOT NULL,
-	"canManageOrders" boolean DEFAULT true NOT NULL,
-	"canViewAnalytics" boolean DEFAULT true NOT NULL,
-	"canManageProducts" boolean DEFAULT true NOT NULL,
-	"createdAt" timestamp DEFAULT now() NOT NULL,
-	"updatedAt" timestamp DEFAULT now(),
-	CONSTRAINT "AdminStoreAccess_id_unique" UNIQUE("id")
-);
---> statement-breakpoint
-CREATE TABLE "AdminStoreSession" (
-	"id" varchar(32) PRIMARY KEY NOT NULL,
-	"userId" varchar(32) NOT NULL,
-	"storeId" varchar(32) NOT NULL,
-	"lastAccessed" timestamp DEFAULT now() NOT NULL,
-	CONSTRAINT "AdminStoreSession_id_unique" UNIQUE("id")
 );
 --> statement-breakpoint
 CREATE TABLE "Cart" (
@@ -149,6 +129,7 @@ CREATE TABLE "Order" (
 	"cancellationReason" text,
 	"estimatedDeliveryDate" timestamp,
 	"deliveredAt" timestamp,
+	"adminViewStatus" "AdminViewStatus" DEFAULT 'NEW' NOT NULL,
 	"createdAt" timestamp DEFAULT now() NOT NULL,
 	"updatedAt" timestamp DEFAULT now(),
 	CONSTRAINT "Order_id_unique" UNIQUE("id")
@@ -321,10 +302,6 @@ CREATE TABLE "VerificationToken" (
 --> statement-breakpoint
 ALTER TABLE "Account" ADD CONSTRAINT "Account_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE "Address" ADD CONSTRAINT "Address_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
-ALTER TABLE "AdminStoreAccess" ADD CONSTRAINT "AdminStoreAccess_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
-ALTER TABLE "AdminStoreAccess" ADD CONSTRAINT "AdminStoreAccess_storeId_fkey" FOREIGN KEY ("storeId") REFERENCES "public"."Store"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
-ALTER TABLE "AdminStoreSession" ADD CONSTRAINT "AdminStoreSession_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
-ALTER TABLE "AdminStoreSession" ADD CONSTRAINT "AdminStoreSession_storeId_fkey" FOREIGN KEY ("storeId") REFERENCES "public"."Store"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE "Cart" ADD CONSTRAINT "Cart_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "Cart" ADD CONSTRAINT "Cart_productId_fkey" FOREIGN KEY ("productId") REFERENCES "public"."Product"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "Cart" ADD CONSTRAINT "Cart_productVariantId_fkey" FOREIGN KEY ("productVariantId") REFERENCES "public"."ProductVariant"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
@@ -350,10 +327,6 @@ ALTER TABLE "session" ADD CONSTRAINT "session_userId_User_id_fk" FOREIGN KEY ("u
 ALTER TABLE "TwoFactorConfirmation" ADD CONSTRAINT "TwoFactorConfirmation_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
 CREATE UNIQUE INDEX "Account_provider_providerAccountId_key" ON "Account" USING btree ("provider","provider_account_id");--> statement-breakpoint
 CREATE INDEX "Adress_userId_index" ON "Address" USING btree ("userId");--> statement-breakpoint
-CREATE UNIQUE INDEX "idx_admin_store_unique" ON "AdminStoreAccess" USING btree ("userId","storeId");--> statement-breakpoint
-CREATE INDEX "idx_admin_store_user" ON "AdminStoreAccess" USING btree ("userId");--> statement-breakpoint
-CREATE INDEX "idx_admin_store_store" ON "AdminStoreAccess" USING btree ("storeId");--> statement-breakpoint
-CREATE UNIQUE INDEX "idx_admin_store_session_unique" ON "AdminStoreSession" USING btree ("userId");--> statement-breakpoint
 CREATE INDEX "idx_cart_userId" ON "Cart" USING btree ("userId");--> statement-breakpoint
 CREATE INDEX "idx_cart_variant" ON "Cart" USING btree ("productVariantId");--> statement-breakpoint
 CREATE UNIQUE INDEX "idx_cart_unique_item" ON "Cart" USING btree ("userId","productVariantId","potency","packSize");--> statement-breakpoint
@@ -376,6 +349,7 @@ CREATE INDEX "order_updated_at_idx" ON "Order" USING btree ("updatedAt");--> sta
 CREATE INDEX "order_payment_status_idx" ON "Order" USING btree ("paymentStatus");--> statement-breakpoint
 CREATE INDEX "order_invoice_number_idx" ON "Order" USING btree ("invoiceNumber");--> statement-breakpoint
 CREATE INDEX "order_payment_delivery_status_idx" ON "Order" USING btree ("paymentStatus","deliveryStatus");--> statement-breakpoint
+CREATE INDEX "order_admin_view_status_ids" ON "Order" USING btree ("adminViewStatus","id");--> statement-breakpoint
 CREATE INDEX "order_details_fulfillment_idx" ON "OrderDetails" USING btree ("fulfilledFromStoreId");--> statement-breakpoint
 CREATE UNIQUE INDEX "PasswordResetToken_email_token_key" ON "PasswordResetToken" USING btree ("email","token");--> statement-breakpoint
 CREATE UNIQUE INDEX "PasswordResetToken_token_key" ON "PasswordResetToken" USING btree ("token");--> statement-breakpoint

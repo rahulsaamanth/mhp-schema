@@ -13,7 +13,6 @@ import {
   integer,
 } from "drizzle-orm/pg-core"
 import type { AdapterAccountType } from "@auth/core/adapters"
-import { time } from "console"
 
 const ENTITY_PREFIX = {
   USER: "USR",
@@ -51,7 +50,10 @@ export const customId = (name: string, prefix: string) =>
 
 export const orderType = pgEnum("OrderType", ["OFFLINE", "ONLINE"])
 
-export const userRole = pgEnum("UserRole", ["ADMIN", "USER", "STORE_ADMIN"])
+export const userRole = pgEnum("UserRole", [
+  "ADMIN",
+  "USER" /* , "STORE_ADMIN" */,
+])
 
 export const movementType = pgEnum("MovementType", ["IN", "OUT", "ADJUSTMENT"])
 
@@ -185,6 +187,13 @@ export const potency = pgEnum("potency", [
   "LM50",
 ])
 
+export const adminViewStatus = pgEnum("AdminViewStatus", [
+  "NEW",
+  "OPENED",
+  "PROCESSING",
+  "CLOSED",
+])
+
 export const discountType = pgEnum("discountType", ["PERCENTAGE", "FIXED"])
 
 export type UserRole = (typeof userRole.enumValues)[number]
@@ -199,8 +208,8 @@ export type Variant = typeof productVariant.$inferSelect
 export type Manufacturer = typeof manufacturer.$inferSelect
 export type Tag = typeof tag.$inferSelect
 export type Store = typeof store.$inferSelect
-export type AdminStoreAccess = typeof adminStoreAccess.$inferSelect
-export type AdminStoreSession = typeof adminStoreSession.$inferSelect
+// export type AdminStoreAccess = typeof adminStoreAccess.$inferSelect
+// export type AdminStoreSession = typeof adminStoreSession.$inferSelect
 export type ProductInventory = typeof productInventory.$inferSelect
 
 export const discountCode = pgTable(
@@ -247,70 +256,70 @@ export const store = pgTable(
   ]
 )
 
-export const adminStoreAccess = pgTable(
-  "AdminStoreAccess",
-  {
-    id: customId("id", ENTITY_PREFIX.ADMIN_STORE),
-    userId: varchar("userId", { length: 32 }).notNull(),
-    storeId: varchar("storeId", { length: 32 }).notNull(),
-    canManageInventory: boolean("canManageInventory").default(true).notNull(),
-    canManageOrders: boolean("canManageOrders").default(true).notNull(),
-    canViewAnalytics: boolean("canViewAnalytics").default(true).notNull(),
-    canManageProducts: boolean("canManageProducts").default(true).notNull(),
-    createdAt: timestamp("createdAt", { mode: "date" }).defaultNow().notNull(),
-    updatedAt: timestamp("updatedAt", { mode: "date" })
-      .defaultNow()
-      .$onUpdate(() => new Date()),
-  },
-  (table) => [
-    foreignKey({
-      columns: [table.userId],
-      foreignColumns: [user.id],
-      name: "AdminStoreAccess_userId_fkey",
-    })
-      .onUpdate("cascade")
-      .onDelete("cascade"),
-    foreignKey({
-      columns: [table.storeId],
-      foreignColumns: [store.id],
-      name: "AdminStoreAccess_storeId_fkey",
-    })
-      .onUpdate("cascade")
-      .onDelete("cascade"),
-    uniqueIndex("idx_admin_store_unique").on(table.userId, table.storeId),
-    index("idx_admin_store_user").on(table.userId),
-    index("idx_admin_store_store").on(table.storeId),
-  ]
-)
+// export const adminStoreAccess = pgTable(
+//   "AdminStoreAccess",
+//   {
+//     id: customId("id", ENTITY_PREFIX.ADMIN_STORE),
+//     userId: varchar("userId", { length: 32 }).notNull(),
+//     storeId: varchar("storeId", { length: 32 }).notNull(),
+//     canManageInventory: boolean("canManageInventory").default(true).notNull(),
+//     canManageOrders: boolean("canManageOrders").default(true).notNull(),
+//     canViewAnalytics: boolean("canViewAnalytics").default(true).notNull(),
+//     canManageProducts: boolean("canManageProducts").default(true).notNull(),
+//     createdAt: timestamp("createdAt", { mode: "date" }).defaultNow().notNull(),
+//     updatedAt: timestamp("updatedAt", { mode: "date" })
+//       .defaultNow()
+//       .$onUpdate(() => new Date()),
+//   },
+//   (table) => [
+//     foreignKey({
+//       columns: [table.userId],
+//       foreignColumns: [user.id],
+//       name: "AdminStoreAccess_userId_fkey",
+//     })
+//       .onUpdate("cascade")
+//       .onDelete("cascade"),
+//     foreignKey({
+//       columns: [table.storeId],
+//       foreignColumns: [store.id],
+//       name: "AdminStoreAccess_storeId_fkey",
+//     })
+//       .onUpdate("cascade")
+//       .onDelete("cascade"),
+//     uniqueIndex("idx_admin_store_unique").on(table.userId, table.storeId),
+//     index("idx_admin_store_user").on(table.userId),
+//     index("idx_admin_store_store").on(table.storeId),
+//   ]
+// )
 
-export const adminStoreSession = pgTable(
-  "AdminStoreSession",
-  {
-    id: customId("id", "ASS"),
-    userId: varchar("userId", { length: 32 }).notNull(),
-    storeId: varchar("storeId", { length: 32 }).notNull(),
-    lastAccessed: timestamp("lastAccessed", { mode: "date" })
-      .defaultNow()
-      .notNull(),
-  },
-  (table) => [
-    foreignKey({
-      columns: [table.userId],
-      foreignColumns: [user.id],
-      name: "AdminStoreSession_userId_fkey",
-    })
-      .onUpdate("cascade")
-      .onDelete("cascade"),
-    foreignKey({
-      columns: [table.storeId],
-      foreignColumns: [store.id],
-      name: "AdminStoreSession_storeId_fkey",
-    })
-      .onUpdate("cascade")
-      .onDelete("cascade"),
-    uniqueIndex("idx_admin_store_session_unique").on(table.userId),
-  ]
-)
+// export const adminStoreSession = pgTable(
+//   "AdminStoreSession",
+//   {
+//     id: customId("id", "ASS"),
+//     userId: varchar("userId", { length: 32 }).notNull(),
+//     storeId: varchar("storeId", { length: 32 }).notNull(),
+//     lastAccessed: timestamp("lastAccessed", { mode: "date" })
+//       .defaultNow()
+//       .notNull(),
+//   },
+//   (table) => [
+//     foreignKey({
+//       columns: [table.userId],
+//       foreignColumns: [user.id],
+//       name: "AdminStoreSession_userId_fkey",
+//     })
+//       .onUpdate("cascade")
+//       .onDelete("cascade"),
+//     foreignKey({
+//       columns: [table.storeId],
+//       foreignColumns: [store.id],
+//       name: "AdminStoreSession_storeId_fkey",
+//     })
+//       .onUpdate("cascade")
+//       .onDelete("cascade"),
+//     uniqueIndex("idx_admin_store_session_unique").on(table.userId),
+//   ]
+// )
 
 export const verificationToken = pgTable(
   "VerificationToken",
@@ -695,6 +704,9 @@ export const order = pgTable(
 
     estimatedDeliveryDate: timestamp("estimatedDeliveryDate", { mode: "date" }),
     deliveredAt: timestamp("deliveredAt", { mode: "date" }),
+    adminViewStatus: adminViewStatus("adminViewStatus")
+      .default("NEW")
+      .notNull(),
 
     createdAt: timestamp("createdAt", { mode: "date" }).defaultNow().notNull(),
     updatedAt: timestamp("updatedAt", { mode: "date" })
@@ -740,6 +752,7 @@ export const order = pgTable(
       table.paymentStatus,
       table.deliveryStatus
     ),
+    index("order_admin_view_status_ids").on(table.adminViewStatus, table.id),
   ]
 )
 

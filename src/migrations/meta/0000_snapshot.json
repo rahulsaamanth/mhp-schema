@@ -1,5 +1,5 @@
 {
-  "id": "4be3d653-0b80-4c82-ba7b-22a3ba58e1dc",
+  "id": "48a21840-6ac7-4a5b-b470-dca365ea4ea5",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -246,255 +246,6 @@
       "uniqueConstraints": {
         "Address_id_unique": {
           "name": "Address_id_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "id"
-          ]
-        }
-      },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.AdminStoreAccess": {
-      "name": "AdminStoreAccess",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(32)",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "userId": {
-          "name": "userId",
-          "type": "varchar(32)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "storeId": {
-          "name": "storeId",
-          "type": "varchar(32)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "canManageInventory": {
-          "name": "canManageInventory",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": true
-        },
-        "canManageOrders": {
-          "name": "canManageOrders",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": true
-        },
-        "canViewAnalytics": {
-          "name": "canViewAnalytics",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": true
-        },
-        "canManageProducts": {
-          "name": "canManageProducts",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": true
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updatedAt": {
-          "name": "updatedAt",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "idx_admin_store_unique": {
-          "name": "idx_admin_store_unique",
-          "columns": [
-            {
-              "expression": "userId",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "storeId",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "idx_admin_store_user": {
-          "name": "idx_admin_store_user",
-          "columns": [
-            {
-              "expression": "userId",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "idx_admin_store_store": {
-          "name": "idx_admin_store_store",
-          "columns": [
-            {
-              "expression": "storeId",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "AdminStoreAccess_userId_fkey": {
-          "name": "AdminStoreAccess_userId_fkey",
-          "tableFrom": "AdminStoreAccess",
-          "tableTo": "User",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
-        },
-        "AdminStoreAccess_storeId_fkey": {
-          "name": "AdminStoreAccess_storeId_fkey",
-          "tableFrom": "AdminStoreAccess",
-          "tableTo": "Store",
-          "columnsFrom": [
-            "storeId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "AdminStoreAccess_id_unique": {
-          "name": "AdminStoreAccess_id_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "id"
-          ]
-        }
-      },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.AdminStoreSession": {
-      "name": "AdminStoreSession",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(32)",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "userId": {
-          "name": "userId",
-          "type": "varchar(32)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "storeId": {
-          "name": "storeId",
-          "type": "varchar(32)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "lastAccessed": {
-          "name": "lastAccessed",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "idx_admin_store_session_unique": {
-          "name": "idx_admin_store_session_unique",
-          "columns": [
-            {
-              "expression": "userId",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "AdminStoreSession_userId_fkey": {
-          "name": "AdminStoreSession_userId_fkey",
-          "tableFrom": "AdminStoreSession",
-          "tableTo": "User",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
-        },
-        "AdminStoreSession_storeId_fkey": {
-          "name": "AdminStoreSession_storeId_fkey",
-          "tableFrom": "AdminStoreSession",
-          "tableTo": "Store",
-          "columnsFrom": [
-            "storeId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "AdminStoreSession_id_unique": {
-          "name": "AdminStoreSession_id_unique",
           "nullsNotDistinct": false,
           "columns": [
             "id"
@@ -1383,6 +1134,14 @@
           "primaryKey": false,
           "notNull": false
         },
+        "adminViewStatus": {
+          "name": "adminViewStatus",
+          "type": "AdminViewStatus",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'NEW'"
+        },
         "createdAt": {
           "name": "createdAt",
           "type": "timestamp",
@@ -1512,6 +1271,27 @@
             },
             {
               "expression": "deliveryStatus",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "order_admin_view_status_ids": {
+          "name": "order_admin_view_status_ids",
+          "columns": [
+            {
+              "expression": "adminViewStatus",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -3331,6 +3111,16 @@
         "SHIPPING"
       ]
     },
+    "public.AdminViewStatus": {
+      "name": "AdminViewStatus",
+      "schema": "public",
+      "values": [
+        "NEW",
+        "OPENED",
+        "PROCESSING",
+        "CLOSED"
+      ]
+    },
     "public.DeliveryStatus": {
       "name": "DeliveryStatus",
       "schema": "public",
@@ -3516,8 +3306,7 @@
       "schema": "public",
       "values": [
         "ADMIN",
-        "USER",
-        "STORE_ADMIN"
+        "USER"
       ]
     }
   },

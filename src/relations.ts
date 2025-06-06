@@ -13,8 +13,8 @@ import {
   address,
   cart,
   store,
-  adminStoreAccess,
-  adminStoreSession,
+  // adminStoreAccess,
+  // adminStoreSession,
   inventoryManagement,
   productInventory,
   discountCode,
@@ -35,8 +35,8 @@ export const userRelations = relations(user, ({ many }) => ({
   reviews: many(review),
   addresses: many(address),
   cartItems: many(cart),
-  adminStoreAccess: many(adminStoreAccess),
-  adminStoreSessions: many(adminStoreSession),
+  // adminStoreAccess: many(adminStoreAccess),
+  // adminStoreSessions: many(adminStoreSession),
   inventoryManagement: many(inventoryManagement),
 }))
 
@@ -163,43 +163,43 @@ export const cartItemRelations = relations(cart, ({ one }) => ({
 }))
 
 // Store Relations
-export const storeRelations = relations(store, ({ many }) => ({
-  adminAccess: many(adminStoreAccess),
-  adminSessions: many(adminStoreSession),
-  orders: many(order),
-  inventoryManagement: many(inventoryManagement),
-  productInventory: many(productInventory),
-}))
+// export const storeRelations = relations(store, ({ many }) => ({
+//   adminAccess: many(adminStoreAccess),
+//   adminSessions: many(adminStoreSession),
+//   orders: many(order),
+//   inventoryManagement: many(inventoryManagement),
+//   productInventory: many(productInventory),
+// }))
 
-// Admin Store Access Relations
-export const adminStoreAccessRelations = relations(
-  adminStoreAccess,
-  ({ one }) => ({
-    user: one(user, {
-      fields: [adminStoreAccess.userId],
-      references: [user.id],
-    }),
-    store: one(store, {
-      fields: [adminStoreAccess.storeId],
-      references: [store.id],
-    }),
-  })
-)
+// // Admin Store Access Relations
+// export const adminStoreAccessRelations = relations(
+//   adminStoreAccess,
+//   ({ one }) => ({
+//     user: one(user, {
+//       fields: [adminStoreAccess.userId],
+//       references: [user.id],
+//     }),
+//     store: one(store, {
+//       fields: [adminStoreAccess.storeId],
+//       references: [store.id],
+//     }),
+//   })
+// )
 
-// Admin Store Session Relations
-export const adminStoreSessionRelations = relations(
-  adminStoreSession,
-  ({ one }) => ({
-    user: one(user, {
-      fields: [adminStoreSession.userId],
-      references: [user.id],
-    }),
-    store: one(store, {
-      fields: [adminStoreSession.storeId],
-      references: [store.id],
-    }),
-  })
-)
+// // Admin Store Session Relations
+// export const adminStoreSessionRelations = relations(
+//   adminStoreSession,
+//   ({ one }) => ({
+//     user: one(user, {
+//       fields: [adminStoreSession.userId],
+//       references: [user.id],
+//     }),
+//     store: one(store, {
+//       fields: [adminStoreSession.storeId],
+//       references: [store.id],
+//     }),
+//   })
+// )
 
 // Inventory Management Relations
 export const inventoryManagementRelations = relations(
