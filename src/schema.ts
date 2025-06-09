@@ -211,6 +211,7 @@ export type Store = typeof store.$inferSelect
 // export type AdminStoreAccess = typeof adminStoreAccess.$inferSelect
 // export type AdminStoreSession = typeof adminStoreSession.$inferSelect
 export type ProductInventory = typeof productInventory.$inferSelect
+export type Subscriber = typeof subscriber.$inferSelect
 
 export const discountCode = pgTable(
   "DiscountCode",
@@ -944,5 +945,19 @@ export const cart = pgTable(
       table.potency,
       table.packSize
     ),
+  ]
+)
+
+export const subscriber = pgTable(
+  "Subscriber",
+  {
+    id: customId("id", "SUB"),
+    email: text("email").notNull().unique(),
+    createdAt: timestamp("createdAt", { mode: "date" }).defaultNow().notNull(),
+    isActive: boolean("isActive").default(true).notNull(),
+  },
+  (table) => [
+    index("idx_subscriber_email").on(table.email),
+    index("idx_subscriber_active").on(table.isActive),
   ]
 )

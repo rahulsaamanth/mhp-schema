@@ -258,6 +258,15 @@ CREATE TABLE "Store" (
 	CONSTRAINT "Store_code_unique" UNIQUE("code")
 );
 --> statement-breakpoint
+CREATE TABLE "Subscriber" (
+	"id" varchar(32) PRIMARY KEY NOT NULL,
+	"email" text NOT NULL,
+	"createdAt" timestamp DEFAULT now() NOT NULL,
+	"isActive" boolean DEFAULT true NOT NULL,
+	CONSTRAINT "Subscriber_id_unique" UNIQUE("id"),
+	CONSTRAINT "Subscriber_email_unique" UNIQUE("email")
+);
+--> statement-breakpoint
 CREATE TABLE "Tags" (
 	"id" varchar(32) PRIMARY KEY NOT NULL,
 	"name" text NOT NULL,
@@ -379,6 +388,8 @@ CREATE INDEX "review_product_date_idx" ON "Review" USING btree ("productId","cre
 CREATE INDEX "idx_store_name" ON "Store" USING btree ("name");--> statement-breakpoint
 CREATE INDEX "idx_store_code" ON "Store" USING btree ("code");--> statement-breakpoint
 CREATE INDEX "idx_store_active" ON "Store" USING btree ("isActive");--> statement-breakpoint
+CREATE INDEX "idx_subscriber_email" ON "Subscriber" USING btree ("email");--> statement-breakpoint
+CREATE INDEX "idx_subscriber_active" ON "Subscriber" USING btree ("isActive");--> statement-breakpoint
 CREATE UNIQUE INDEX "TwoFactorConfirmation_userId_key" ON "TwoFactorConfirmation" USING btree ("userId");--> statement-breakpoint
 CREATE UNIQUE INDEX "TwoFactorToken_email_token_key" ON "TwoFactorToken" USING btree ("email");--> statement-breakpoint
 CREATE UNIQUE INDEX "TwoFactorToken_token_key" ON "TwoFactorToken" USING btree ("token");--> statement-breakpoint
