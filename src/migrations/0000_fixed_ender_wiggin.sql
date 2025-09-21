@@ -225,8 +225,7 @@ CREATE TABLE "ProductVariant" (
 	"sellingPrice" double precision NOT NULL,
 	"createdAt" timestamp DEFAULT now() NOT NULL,
 	"updatedAt" timestamp DEFAULT now(),
-	CONSTRAINT "ProductVariant_id_unique" UNIQUE("id"),
-	CONSTRAINT "ProductVariant_sku_unique" UNIQUE("sku")
+	CONSTRAINT "ProductVariant_id_unique" UNIQUE("id")
 );
 --> statement-breakpoint
 CREATE TABLE "Review" (

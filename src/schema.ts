@@ -547,7 +547,7 @@ export const productVariant = pgTable(
     id: customId("id", ENTITY_PREFIX.PRODUCT + "VAR"),
     discontinued: boolean("discontinued").default(false),
     productId: varchar("productId", { length: 32 }).notNull(),
-    sku: varchar("sku", { length: 50 }).notNull().unique(),
+    sku: varchar("sku", { length: 50 }).notNull(),
     variantName: text("variantName").notNull(),
     variantImage: text("variantImage").array(),
     potency: potency("potency").default("NONE").notNull(),

@@ -1,5 +1,5 @@
 {
-  "id": "fb262a71-378f-4cfb-b4c8-a7592710cfcb",
+  "id": "333f6987-5ab0-484a-86dd-0513bbf11a7f",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -2460,13 +2460,6 @@
           "nullsNotDistinct": false,
           "columns": [
             "id"
-          ]
-        },
-        "ProductVariant_sku_unique": {
-          "name": "ProductVariant_sku_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "sku"
           ]
         }
       },
